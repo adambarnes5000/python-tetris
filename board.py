@@ -1,5 +1,5 @@
 from utils import *
-
+import pygame
 
 class Board():
 
@@ -42,6 +42,7 @@ class Board():
         if len(rows_to_remove)>0:
             self.remove_rows(rows_to_remove)
             self.update_board()
+        return len(rows_to_remove)
 
     def remove_rows(self, rows_to_remove):
         new_data = []
@@ -60,3 +61,16 @@ class Board():
         for y, row in enumerate(self.data):
             for x,cell in enumerate(row):
                 self.draw([(x,y)], cell)
+
+    def display_next_block(self, cells, colour):
+        self.surf.fill((0,0,0),(400-self.cell_size,100-self.cell_size,self.cell_size*4,self.cell_size*4))
+        for cell in cells:
+            x = 400 + cell[0] * self.cell_size
+            y = 100 + cell[1] * self.cell_size
+            self.surf.fill(colour, (x, y, self.cell_size, self.cell_size))
+
+    def display_score(self, score):
+        myfont = pygame.font.SysFont("ubuntu", 15)
+        label = myfont.render(str(score), 1, (200, 200, 200))
+        self.surf.fill((0, 0, 0), (200, 85, 50, 50))
+        self.surf.blit(label, (200, 85))

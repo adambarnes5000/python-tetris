@@ -11,6 +11,9 @@ BLOCKS = (
     ((((0,-1),(0,0),(0,1),(0,2)),((-1,0),(0,0),(1,0),(2,0)),((0,-1),(0,0),(0,1),(0,2)),((-1,0),(0,0),(1,0),(2,0))),(200,200,200))
     )
 
+next_block = random.choice(BLOCKS)
+
+
 class Block():
 
     def __init__(self, block_data, pos):
@@ -38,6 +41,12 @@ class Block():
         return map(lambda c: add_tuples(add_tuples(self.pos, c),direction), self.data[0][self.rotation])
 
 
+def get_next_block_display():
+    return Block(next_block, (0,0))
+
+
 def new_block(position):
-    block_data = random.choice(BLOCKS)
-    return Block(block_data, position)
+    global next_block
+    block = Block(next_block, position)
+    next_block = random.choice(BLOCKS)
+    return block
