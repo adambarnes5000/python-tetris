@@ -1,26 +1,27 @@
 from utils import *
 import pygame
+from PIL import ImageFont
 
+class BoardTFT:
 
-class Board():
-
-    def __init__(self, surf, dimensions, cell_size, start_point):
-        self.surf = surf
+    def __init__(self, draw, dimensions, cell_size, start_point):
+        self.draw = draw
         self.data = []
         self.cell_size = cell_size
         self.start_point = start_point
         self.dimensions = dimensions
+        self.font = ImageFont.load_default()
         for y in range(dimensions[1]):
             row = []
             self.data.append(row)
             for x in range(dimensions[0]):
                 row.append((0,0,0))
 
-    def draw(self, cells, colour, stamp=False):
+    def draw_cells(self, cells, colour, stamp=False):
         for cell in cells:
             x = self.start_point[0] + cell[0] * self.cell_size
             y = self.start_point[1] + cell[1] * self.cell_size
-            self.surf.fill(colour, (x,y,self.cell_size,self.cell_size))
+            self.draw.rectangle((x,y,x+self.cell_size,y+self.cell_size),fill=colour)
             if stamp:
                 self.data[cell[1]][cell[0]] = colour
 
@@ -58,20 +59,18 @@ class Board():
         self.data = new_data
 
     def update_board(self):
-        self.surf.fill((0,0,0), (0, 0, self.dimensions[0]*self.cell_size, self.dimensions[1]*self.cell_size))
+        self.draw.fill((0,0,0), (0, 0, self.dimensions[0]*self.cell_size, self.dimensions[1]*self.cell_size))
         for y, row in enumerate(self.data):
             for x,cell in enumerate(row):
                 self.draw([(x,y)], cell)
 
-    def display_next_block(self, cells, colour):
-        self.surf.fill((0,0,0),(400-self.cell_size,100-self.cell_size,self.cell_size*4,self.cell_size*4))
+    def display_next_block(self, cells, colour, pos):
+        self.draw.rectangle((pos[0] - self.cell_size, pos[1] - self.cell_size, pos[0] + (self.cell_size*3), pos[1] + (self.cell_size*3)), fill=(0,0,0))
         for cell in cells:
-            x = 400 + cell[0] * self.cell_size
-            y = 100 + cell[1] * self.cell_size
-            self.surf.fill(colour, (x, y, self.cell_size, self.cell_size))
+            x = pos[0] + cell[0] * self.cell_size
+            y = pos[1] + cell[1] * self.cell_size
+            self.draw.rectangle((x, y, x+self.cell_size, y+self.cell_size),fill=colour)
 
     def display_score(self, score):
-        myfont = pygame.font.SysFont("ubuntu", 15)
-        label = myfont.render(str(score), 1, (200, 200, 200))
-        self.surf.fill((0, 0, 0), (200, 85, 50, 50))
-        self.surf.blit(label, (200, 85))
+        self.draw.rectangle((20,60,40,80),fill=(0,0,0))
+        self.draw.text((20,60),str(score),font=self.font,fill=(200,200,200))
