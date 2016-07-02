@@ -59,10 +59,10 @@ class BoardTFT:
         self.data = new_data
 
     def update_board(self):
-        self.draw.fill((0,0,0), (0, 0, self.dimensions[0]*self.cell_size, self.dimensions[1]*self.cell_size))
+        self.draw.rectangle((self.start_point[0], self.start_point[1], self.start_point[0]+self.dimensions[0]*self.cell_size, self.start_point[1]+self.dimensions[1]*self.cell_size),fill=(0,0,0))
         for y, row in enumerate(self.data):
             for x,cell in enumerate(row):
-                self.draw([(x,y)], cell)
+                self.draw_cells([(x,y)], cell)
 
     def display_next_block(self, cells, colour, pos):
         self.draw.rectangle((pos[0] - self.cell_size, pos[1] - self.cell_size, pos[0] + (self.cell_size*3), pos[1] + (self.cell_size*3)), fill=(0,0,0))

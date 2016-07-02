@@ -1,12 +1,15 @@
 #!/usr/bin/python
 
-import pygame
 import blocks
 from board_tft import BoardTFT as Board
 from utils import *
+
+from buttons import Buttons
+
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+import RPi.GPIO as GPIO
 
 import Adafruit_ILI9341 as TFT
 import Adafruit_GPIO.SPI as SPI
@@ -15,6 +18,11 @@ DC = 18
 RST = 23
 SPI_PORT = 0
 SPI_DEVICE = 0
+
+CLOCKPIN = 5
+DATAPIN = 6
+SWITCHPIN = 13
+BUTTONPIN = 21
 
 CELL_SIZE=7
 BOARD_WIDTH=10
@@ -33,7 +41,6 @@ REFRESH_PERIOD=150
 class Tetris():
 
     def __init__(self):
-        pygame.init()
         self.disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
         self.disp.begin()
         self.disp.clear()
@@ -47,6 +54,10 @@ class Tetris():
         self.score = 0
         self.update_score(0)
         self.disp.display()
+        self.buttons = Buttons({21: self.rotate,
+                                26: self.move_left,
+                                19: self.move_right,
+                                16: self.drop})
         self.running = False
 
     def draw_container(self):
@@ -89,28 +100,22 @@ class Tetris():
             self.last_update = timestamp()
             self.update()
 
-    def handle_events(self):
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    self.move_block(LEFT)
-                if event.key == pygame.K_RIGHT:
-                    self.move_block(RIGHT)
-                if event.key == pygame.K_DOWN:
-                    self.update_score(10*(40-self.block.pos[1]))
-                    self.update_delay = 0
-                if event.key == pygame.K_RETURN or event.key == pygame.K_UP:
-                    self.rotate()
-            if event.type == pygame.QUIT:
-                self.quit()
+    def drop(self, buttonevent):
+        self.update_score(10 * (40 - self.block.pos[1]))
+        self.update_delay = 0
 
-    def rotate(self):
+    def rotate(self, buttonevent):
         new_cells = self.block.get_rotated_new_cells()
         if self.board.can_place(new_cells):
             self.board.draw_cells(self.block.get_cells(), (0, 0, 0))
             self.block.rotate()
             self.board.draw_cells(self.block.get_cells(), self.block.get_colour())
+
+    def move_right(self, buttonevent):
+        self.move_block(RIGHT)
+
+    def move_left(self, buttonevent):
+        self.move_block(LEFT)
 
     def move_block(self, direction):
         new_cells = self.block.get_new_cells(direction)
@@ -124,10 +129,9 @@ class Tetris():
     def run(self):
         self.running = True
         while self.running:
-            #self.handle_events()
             self.check_update()
             self.disp.display()
-        pygame.quit()
+        #self.buttons.stop()
 
 if __name__ == "__main__":
     app = Tetris()
